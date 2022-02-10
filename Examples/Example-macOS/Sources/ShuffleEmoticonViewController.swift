@@ -5,7 +5,7 @@ final class ShuffleEmoticonViewController: NSViewController {
     @IBOutlet private weak var collectionView: NSCollectionView!
     @IBOutlet private weak var tableView: NSTableView!
 
-    private var data = (0x1F600...0x1F647).compactMap { UnicodeScalar($0).map(String.init) }
+    private var data = (0x1F600 ... 0x1F602).compactMap { UnicodeScalar($0).map(String.init) }
     private var dataInput: [String] {
         get { return data }
         set {
@@ -20,7 +20,30 @@ final class ShuffleEmoticonViewController: NSViewController {
     }
 
     @IBAction func shufflePress(_ button: NSButton) {
-        dataInput.shuffle()
+        // Remove middle element
+        var oldData = data
+        let middleElement = data.remove(at: 1)
+
+        // Apply changes manually
+        var changeset = StagedChangeset(source: oldData, target: data)
+        tableView.reload(using: changeset, with: .effectFade) { data in
+            self.data = data
+        }
+
+        // Step 2
+        oldData = data
+        // Now swap element 0 and element 1, insert middle element back at position 0
+        let tmp = data[0]
+        data[0] = data[1]
+        data[1] = tmp
+
+        data.insert(middleElement, at: 1)
+
+        // Apply changes manually
+        changeset = StagedChangeset(source: oldData, target: data)
+        tableView.reload(using: changeset, with: .effectFade) { data in
+            self.data = data
+        }
     }
 
     override func awakeFromNib() {
@@ -53,6 +76,7 @@ extension ShuffleEmoticonViewController: NSTableViewDataSource, NSTableViewDeleg
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        print("viewFor:row", row, data[row])
         let view = tableView.makeView(withIdentifier: NSTableCellView.itemIdentifier, owner: tableView) as! NSTableCellView
         view.textField?.stringValue = data[row]
         return view
