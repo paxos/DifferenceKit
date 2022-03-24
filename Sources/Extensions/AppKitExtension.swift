@@ -73,6 +73,10 @@ public extension NSTableView {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
                 print("removeRows", changeset.elementDeleted)
             }
+       
+            // Fix?
+//            endUpdates()
+//            beginUpdates()
 
             if !changeset.elementInserted.isEmpty {
                 insertRows(at: IndexSet(changeset.elementInserted.map { $0.element }), withAnimation: insertRowsAnimation())
