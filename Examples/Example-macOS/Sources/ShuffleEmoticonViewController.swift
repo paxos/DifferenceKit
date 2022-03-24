@@ -5,7 +5,7 @@ final class ShuffleEmoticonViewController: NSViewController {
     @IBOutlet private var collectionView: NSCollectionView!
     @IBOutlet private var tableView: NSTableView!
 
-    private var data =  ["1", "2", "3", "4"]
+    private var data =  ["1", "2", "3", "4", "5"]
     private var dataInput: [String] {
         get { return data }
         set {
@@ -85,13 +85,14 @@ final class ShuffleEmoticonViewController: NSViewController {
 //       doRandomThings()
 
         let sequence1 = [
-            ["4", "3", "2", "1"]
+//            ["4", "3", "2", "1"]
 //            ["lol", "1", "5", "4", ]
 //            ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
 //            ["2", "5", "1", "7", "8", "3", "4", "6", "9", "10"],
 //            ["5", "3", "1", "7", "8", "9", "4", "2", "6", "10"],
 //            ["5", "1", "7", "4", "2", "10"],
 //            ["2", "7", "1", "5", "8", "4", "9", "3", "6", "10"]
+            ["5", "4", "3", "2", "1"]
         ]
 
         let oldData = data

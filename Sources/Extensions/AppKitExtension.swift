@@ -105,6 +105,7 @@ public extension NSTableView {
             typealias MovedElement = (source: ElementPath, target: ElementPath)
             func adjustOffsets(_ elementsMoved: [MovedElement]) -> [MovedElement] {
                 var currentOffset = 0
+                var secondOffset = 0
                 var results: [MovedElement] = []
 
                 for (index, var element) in elementsMoved.enumerated() {
@@ -114,10 +115,13 @@ public extension NSTableView {
                     if let previousElement = previousElement {
                         if previousElement.target.element <= element.source.element {
                             currentOffset += 1
+                        } else {
+                            secondOffset += 1 // not sure if this is correct
                         }
                     }
 
                     element.source.element += currentOffset
+                    element.target.element += secondOffset
                     results.append(MovedElement((source: element.source, target: element.target)))
                 }
 
