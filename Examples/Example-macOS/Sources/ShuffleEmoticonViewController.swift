@@ -5,7 +5,7 @@ final class ShuffleEmoticonViewController: NSViewController {
     @IBOutlet private var collectionView: NSCollectionView!
     @IBOutlet private var tableView: NSTableView!
 
-    private var data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    private var data =  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     private var dataInput: [String] {
         get { return data }
         set {
@@ -85,13 +85,14 @@ final class ShuffleEmoticonViewController: NSViewController {
 //       doRandomThings()
 
         let sequence1 = [
-            //            ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+//            ["lol", "1", "5", "4", ]
+//            ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
 //            ["2", "5", "1", "7", "8", "3", "4", "6", "9", "10"],
 //            ["5", "3", "1", "7", "8", "9", "4", "2", "6", "10"],
-            ["5", "1", "7", "4", "2", "10"],
-//            ["2", "7", "1", "5", "8", "4", "9", "3", "6", "10"]
+//            ["5", "1", "7", "4", "2", "10"],
+            ["2", "7", "1", "5", "8", "4", "9", "3", "6", "10"]
         ]
-        
+
         let oldData = data
 
         for step in sequence1 {
@@ -99,6 +100,7 @@ final class ShuffleEmoticonViewController: NSViewController {
 
             let changeset = StagedChangeset(source: data, target: step)
             tableView.reload(using: changeset, with: .effectFade) { data in
+                print("applying data: ", data)
                 self.data = data
             }
 
@@ -106,7 +108,7 @@ final class ShuffleEmoticonViewController: NSViewController {
             let dataFromTable = dataFromTableState()
 
             if dataItShouldBe != dataFromTable {
-                print("Data is not in sync!")
+                print("FINAL data is not in sync!")
                 print("Should be: ", dataItShouldBe)
                 print("But is: ", dataFromTable)
             }

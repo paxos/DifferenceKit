@@ -2,6 +2,16 @@
 import AppKit
 
 public extension NSTableView {
+    private func dataFromTableState() -> [String] {
+        var data = [String]()
+        for row in 0 ... numberOfRows - 1 {
+            if let valueOfView = (view(atColumn: 0, row: row, makeIfNecessary: false) as? NSTableCellView)?.textField?.objectValue as? String {
+                data.append(valueOfView)
+            }
+        }
+        return data
+    }
+
     /// Applies multiple animated updates in stages using `StagedChangeset`.
     ///
     /// - Note: There are combination of changes that crash when applied simultaneously in `performBatchUpdates`.
@@ -66,6 +76,9 @@ public extension NSTableView {
                 return reloadData()
             }
 
+            var insertionLog = [Int]()
+            var removeLog = [Int]()
+
             beginUpdates()
             setData(changeset.data)
 
@@ -73,26 +86,72 @@ public extension NSTableView {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
                 print("removeRows", changeset.elementDeleted)
             }
-       
-            // Fix?
-//            endUpdates()
-//            beginUpdates()
 
             if !changeset.elementInserted.isEmpty {
                 insertRows(at: IndexSet(changeset.elementInserted.map { $0.element }), withAnimation: insertRowsAnimation())
-                print("InsertRows", changeset.elementUpdated)
+                print("InsertRows", changeset.elementInserted)
+                changeset.elementInserted.forEach { insertionLog.append($0.element) }
             }
 
             if !changeset.elementUpdated.isEmpty {
                 reloadData(forRowIndexes: IndexSet(changeset.elementUpdated.map { $0.element }), columnIndexes: IndexSet(changeset.elementUpdated.map { $0.section }))
             }
-            
+
             endUpdates()
             beginUpdates()
 
             for (source, target) in changeset.elementMoved {
-                print("Move", source, target)
-                moveRow(at: source.element, to: target.element)
+                print("UI State before: ", dataFromTableState())
+                /// A "move" is the same as this:
+                /// removeRows(at: IndexSet(integer: source.element))
+                /// insertRows(at: IndexSet(integer: target.element))
+
+//                print("Move", source, target)
+
+//                let sourceAdjustment = insertionLog.filter { $0 < source.element }.count - removeLog.filter { $0 < source.element }.count
+//                let targetAdjustment = insertionLog.filter { $0 < target.element }.count - removeLog.filter { $0 < target.element }.count
+
+//                let sourceAdjustment = insertionLog.count
+//                let targetAdjustment = insertionLog.filter { $0 < target.element }.count - removeLog.filter { $0 < target.element }.count
+//
+//                let adjustedTargetIndex = target.element + sourceAdjustment
+                let adjustedSourceIndex = source.element + insertionLog.count
+
+                print("Move", source.element, target.element)
+                print("Move adjusted", adjustedSourceIndex, target.element)
+                
+                moveRow(at: adjustedSourceIndex, to: target.element)
+
+//
+                ////                print("target.element: \(target.element), adjustedTargetIndex: \(adjustedTargetIndex)")
+//                print("Move", adjustedSourceIndex, target.element)
+//                print("Move adjusted", source.element, adjustedTargetIndex)
+//
+//                /// Moves are not swaps; they are inserts and removes and affect all indexes immediately
+//                moveRow(at: adjustedSourceIndex, to: adjustedTargetIndex)
+
+//                beginUpdates()
+
+                // make it a swap
+//                moveRow(at: target.element + 1, to: source.element)
+//                print("Move", target.element + 1, source.element)
+                ////                endUpdates()
+//
+                removeLog.append(source.element)
+                insertionLog.append(target.element)
+
+                print("UI State after: ", dataFromTableState())
+
+//                beginUpdates()
+            }
+            let dataItShouldBe = changeset.data as! [String]
+            let dataFromTable = dataFromTableState()
+            if dataItShouldBe != dataFromTable {
+                print("❌ Data is not in sync!")
+                print("Should: ", dataItShouldBe)
+                print("But is: ", dataFromTable)
+            } else {
+                print("✅ data in sync ", dataFromTable)
             }
 
             endUpdates()
