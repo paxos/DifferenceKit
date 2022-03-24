@@ -1,6 +1,8 @@
 #if os(macOS)
 import AppKit
 
+typealias MovedElement = (source: ElementPath, target: ElementPath)
+
 public extension NSTableView {
     private func dataFromTableState() -> [String] {
         var data = [String]()
@@ -57,6 +59,9 @@ public extension NSTableView {
     ///                updates should be stopped and performed reloadData. Default is nil.
     ///   - setData: A closure that takes the collection as a parameter.
     ///              The collection should be set to data-source of NSTableView.
+
+    // Every move is a REMOVE and an INSERT, and after each operation the indexes higher than the current one need to be incremented/decremted
+
     func reload<C>(
         using stagedChangeset: StagedChangeset<C>,
         deleteRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
@@ -71,111 +76,51 @@ public extension NSTableView {
         }
 
         for changeset in stagedChangeset {
+            print("➡️ next changeset…")
             if let interrupt = interrupt, interrupt(changeset), let data = stagedChangeset.last?.data {
                 setData(data)
                 return reloadData()
             }
 
-            var insertionLog = [Int]()
-            var removeLog = [Int]()
-
+            print("UI State: \(dataFromTableState())")
             beginUpdates()
             setData(changeset.data)
+
+            let operations = changeset.elementMoved.map { OrderedOperation(from: $0.source.element, to: $0.target.element) }
+            let converter = OrderedOperationConverter(unorderedOperations: operations)
 
             if !changeset.elementDeleted.isEmpty {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
                 print("removeRows", changeset.elementDeleted)
+
+                changeset.elementDeleted.forEach { converter.recordDelete(atIndex: $0.element) }
             }
 
             if !changeset.elementInserted.isEmpty {
                 insertRows(at: IndexSet(changeset.elementInserted.map { $0.element }), withAnimation: insertRowsAnimation())
                 print("InsertRows", changeset.elementInserted)
-                changeset.elementInserted.forEach { insertionLog.append($0.element) }
+
+                // TODO: Adjust target offsets after current index
+                changeset.elementInserted.forEach { converter.recordInsert(atIndex: $0.element + 1) }
             }
 
             if !changeset.elementUpdated.isEmpty {
                 reloadData(forRowIndexes: IndexSet(changeset.elementUpdated.map { $0.element }), columnIndexes: IndexSet(changeset.elementUpdated.map { $0.section }))
             }
 
+            converter.convert()
+
             endUpdates()
+            print("UI State: \(dataFromTableState())")
+
             beginUpdates()
-
-            // Adjust offsets for serial apply, not parallel
-
-            typealias MovedElement = (source: ElementPath, target: ElementPath)
-            func adjustOffsets(_ elementsMoved: [MovedElement], initialOffset: Int) -> [MovedElement] {
-                var currentOffset = initialOffset
-                var secondOffset = 0
-                var results: [MovedElement] = []
-
-                for (index, var element) in elementsMoved.enumerated() {
-                    let previousElement: MovedElement? = index > 0 ? elementsMoved[index - 1] : nil
-                    let nextElement: MovedElement? = index < elementsMoved.count - 1 ? elementsMoved[index + 1] : nil
-
-                    if let previousElement = previousElement {
-                        if previousElement.target.element <= element.source.element {
-                            currentOffset += 1
-                        } else {
-                            secondOffset += 1 // not sure if this is correct
-                        }
-                    }
-
-                    element.source.element += currentOffset
-                    element.target.element += secondOffset
-                    results.append(MovedElement((source: element.source, target: element.target)))
-                }
-
-                return results
+            converter.operations.forEach {
+                print("Move", $0.from, $0.to)
+                moveRow(at: $0.from, to: $0.to)
             }
+            endUpdates()
+            print("UI State: \(dataFromTableState())")
 
-            let adjusted = adjustOffsets(changeset.elementMoved, initialOffset: insertionLog.count)
-
-            print("÷·")
-
-            for (source, target) in adjusted {
-                print("UI State before: ", dataFromTableState())
-                /// A "move" is the same as this:
-                /// removeRows(at: IndexSet(integer: source.element))
-                /// insertRows(at: IndexSet(integer: target.element))
-
-//                print("Move", source, target)
-
-//                let sourceAdjustment = insertionLog.filter { $0 < source.element }.count - removeLog.filter { $0 < source.element }.count
-//                let targetAdjustment = insertionLog.filter { $0 < target.element }.count - removeLog.filter { $0 < target.element }.count
-
-//                let sourceAdjustment = insertionLog.count
-//                let targetAdjustment = insertionLog.filter { $0 < target.element }.count - removeLog.filter { $0 < target.element }.count
-//
-//                let adjustedTargetIndex = target.element + sourceAdjustment
-//                let adjustedSourceIndex = source.element + insertionLog.count
-
-                print("Move", source.element, target.element)
-//                print("Move adjusted", adjustedSourceIndex, target.element)
-
-                moveRow(at: source.element, to: target.element)
-
-//
-                ////                print("target.element: \(target.element), adjustedTargetIndex: \(adjustedTargetIndex)")
-//                print("Move", adjustedSourceIndex, target.element)
-//                print("Move adjusted", source.element, adjustedTargetIndex)
-//
-//                /// Moves are not swaps; they are inserts and removes and affect all indexes immediately
-//                moveRow(at: adjustedSourceIndex, to: adjustedTargetIndex)
-
-//                beginUpdates()
-
-                // make it a swap
-//                moveRow(at: target.element + 1, to: source.element)
-//                print("Move", target.element + 1, source.element)
-                ////                endUpdates()
-//
-                removeLog.append(source.element)
-                insertionLog.append(target.element)
-
-                print("UI State after: ", dataFromTableState())
-
-//                beginUpdates()
-            }
             let dataItShouldBe = changeset.data as! [String]
             let dataFromTable = dataFromTableState()
             if dataItShouldBe != dataFromTable {
@@ -185,8 +130,6 @@ public extension NSTableView {
             } else {
                 print("✅ data in sync ", dataFromTable)
             }
-
-            endUpdates()
         }
     }
 }
