@@ -100,7 +100,35 @@ public extension NSTableView {
             endUpdates()
             beginUpdates()
 
-            for (source, target) in changeset.elementMoved {
+            // Adjust offsets for serial apply, not parallel
+
+            typealias MovedElement = (source: ElementPath, target: ElementPath)
+            func adjustOffsets(_ elementsMoved: [MovedElement]) -> [MovedElement] {
+                var currentOffset = 0
+                var results: [MovedElement] = []
+
+                for (index, var element) in elementsMoved.enumerated() {
+                    let previousElement: MovedElement? = index > 0 ? elementsMoved[index - 1] : nil
+                    let nextElement: MovedElement? = index < elementsMoved.count - 1 ? elementsMoved[index + 1] : nil
+
+                    if let previousElement = previousElement {
+                        if previousElement.target.element <= element.source.element {
+                            currentOffset += 1
+                        }
+                    }
+
+                    element.source.element += currentOffset
+                    results.append(MovedElement((source: element.source, target: element.target)))
+                }
+
+                return results
+            }
+
+            let adjusted = adjustOffsets(changeset.elementMoved)
+
+            print("÷·")
+
+            for (source, target) in adjusted {
                 print("UI State before: ", dataFromTableState())
                 /// A "move" is the same as this:
                 /// removeRows(at: IndexSet(integer: source.element))
@@ -115,12 +143,12 @@ public extension NSTableView {
 //                let targetAdjustment = insertionLog.filter { $0 < target.element }.count - removeLog.filter { $0 < target.element }.count
 //
 //                let adjustedTargetIndex = target.element + sourceAdjustment
-                let adjustedSourceIndex = source.element + insertionLog.count
+//                let adjustedSourceIndex = source.element + insertionLog.count
 
                 print("Move", source.element, target.element)
-                print("Move adjusted", adjustedSourceIndex, target.element)
-                
-                moveRow(at: adjustedSourceIndex, to: target.element)
+//                print("Move adjusted", adjustedSourceIndex, target.element)
+
+                moveRow(at: source.element, to: target.element)
 
 //
                 ////                print("target.element: \(target.element), adjustedTargetIndex: \(adjustedTargetIndex)")
