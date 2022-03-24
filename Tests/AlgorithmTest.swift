@@ -415,8 +415,8 @@ extension AlgorithmTestCase {
                 Changeset(
                     data: target1,
                     sectionMoved: [
+                        (source: 2, target: 1),
                         (source: 1, target: 0),
-                        (source: 2, target: 1)
                     ]
                 )
             ]
