@@ -33,12 +33,15 @@ final class ShuffleEmoticonViewController: NSViewController {
 
     func runScenarios() {
         let scenarios = [
+            // failing
+            (from: ["1", "2", "3"], to: ["1", "3", "4", "2"]), // Example where move relates to index of initial sets, so move needs to go first
+
+            // Okay
+
             (from: ["1", "2", "3"], to: ["3", "2", "1"]),
             (from: ["1", "2", "3", "4"], to: ["4", "3", "2", "1"]),
             (from: ["1", "2", "3"], to: ["1", "2"]),
             (from: ["1", "2", "3"], to: ["1", "2", "3", "4"]),
-
-            (from: ["1", "2", "3"], to: ["1", "3", "4", "2"]),
 
             (from: ["1", "2", "3", "4", "5", "6", "7", "8", "9"], to: ["1", "3", "4", "2"]),
             (from: ["1", "2", "3", "4", "5", "6", "7", "8", "9"], to: ["1", "rofl", "4", "2", "lol"]),
@@ -50,7 +53,7 @@ final class ShuffleEmoticonViewController: NSViewController {
             (from: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], to: ["5", "1", "7", "4", "2", "10"]),
 
             (from: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], to: ["5", "1", "7", "4", "2", "10"]),
-            
+
             (from: ["test", "is", "this", "working", "?"], to: ["5", "maybe", "test", "not", "sure", "?"]),
         ]
 
@@ -68,6 +71,9 @@ final class ShuffleEmoticonViewController: NSViewController {
     func runScenario(from: [String], to: [String]) -> [String] {
         data = from
         tableView.reloadData()
+
+        // This forces a "flush" of the changes
+        tableView.layout()
 
         let changeset = StagedChangeset(source: from, target: to)
         tableView.reload(using: changeset, with: .effectFade) { data in
@@ -133,8 +139,6 @@ final class ShuffleEmoticonViewController: NSViewController {
     @IBAction func shufflePress(_ button: NSButton) {
         runScenarios()
 
-        
-        
 //
 //
 //        let sequence1 = [

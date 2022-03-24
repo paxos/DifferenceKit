@@ -82,12 +82,24 @@ public extension NSTableView {
                 return reloadData()
             }
 
+            let operations = changeset.elementMoved.map { OrderedOperation(from: $0.source.element, to: $0.target.element) }
+            let converter = OrderedOperationConverter(unorderedOperations: operations)
+            
+            converter.convert()
             print("UI State: \(dataFromTableState())")
+
+            beginUpdates()
+            converter.operations.forEach {
+                print("Move", $0.from, $0.to)
+                moveRow(at: $0.from, to: $0.to)
+            }
+            endUpdates()
+            print("UI State: \(dataFromTableState())")
+            
             beginUpdates()
             setData(changeset.data)
 
-            let operations = changeset.elementMoved.map { OrderedOperation(from: $0.source.element, to: $0.target.element) }
-            let converter = OrderedOperationConverter(unorderedOperations: operations)
+
 
             if !changeset.elementDeleted.isEmpty {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
@@ -108,18 +120,36 @@ public extension NSTableView {
                 reloadData(forRowIndexes: IndexSet(changeset.elementUpdated.map { $0.element }), columnIndexes: IndexSet(changeset.elementUpdated.map { $0.section }))
             }
 
-            converter.convert()
-
             endUpdates()
-            print("UI State: \(dataFromTableState())")
 
-            beginUpdates()
-            converter.operations.forEach {
-                print("Move", $0.from, $0.to)
-                moveRow(at: $0.from, to: $0.to)
-            }
-            endUpdates()
-            print("UI State: \(dataFromTableState())")
+
+            // Convert the unordered instruction set to an ordered one
+//            let orderedOperations = OrderedOperations(unorderedOperations: changeset.elementMoved)
+//            orderedOperations.convert()
+//
+//            orderedOperations.operations.forEach { moveRow(at: $0.from, to: $0.to) }
+
+//            beginUpdates()
+//            for (source, target) in changeset.elementMoved {
+//                print("UI State before: ", dataFromTableState())
+//                /// A "move" is the same as this:
+//                /// removeRows(at: IndexSet(integer: source.element))
+//                /// insertRows(at: IndexSet(integer: target.element))
+//
+//                print("Move", source.element, target.element)
+            ////                print("Move adjusted", adjustedSourceIndex, target.element)
+//
+//                moveRow(at: source.element, to: target.element)
+//
+            ////
+            ////                removeLog.append(source.element)
+            ////                insertionLog.append(target.element)
+//
+//                print("UI State after: ", dataFromTableState())
+//
+            ////                beginUpdates()
+//            }
+//            endUpdates()
 
             let dataItShouldBe = changeset.data as! [String]
             let dataFromTable = dataFromTableState()
@@ -130,6 +160,8 @@ public extension NSTableView {
             } else {
                 print("✅ data in sync ", dataFromTable)
             }
+
+//            endUpdates()
         }
     }
 }
