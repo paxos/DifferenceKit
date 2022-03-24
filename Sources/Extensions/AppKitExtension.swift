@@ -103,8 +103,8 @@ public extension NSTableView {
             // Adjust offsets for serial apply, not parallel
 
             typealias MovedElement = (source: ElementPath, target: ElementPath)
-            func adjustOffsets(_ elementsMoved: [MovedElement]) -> [MovedElement] {
-                var currentOffset = 0
+            func adjustOffsets(_ elementsMoved: [MovedElement], initialOffset: Int) -> [MovedElement] {
+                var currentOffset = initialOffset
                 var secondOffset = 0
                 var results: [MovedElement] = []
 
@@ -128,7 +128,7 @@ public extension NSTableView {
                 return results
             }
 
-            let adjusted = adjustOffsets(changeset.elementMoved)
+            let adjusted = adjustOffsets(changeset.elementMoved, initialOffset: insertionLog.count)
 
             print("÷·")
 
