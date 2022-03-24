@@ -21,7 +21,7 @@ public extension NSTableView {
         with animation: @autoclosure () -> NSTableView.AnimationOptions,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
         setData: (C) -> Void
-        ) {
+    ) {
         reload(
             using: stagedChangeset,
             deleteRowsAnimation: animation(),
@@ -54,7 +54,7 @@ public extension NSTableView {
         reloadRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
         setData: (C) -> Void
-        ) {
+    ) {
         if case .none = window, let data = stagedChangeset.last?.data {
             setData(data)
             return reloadData()
@@ -71,17 +71,23 @@ public extension NSTableView {
 
             if !changeset.elementDeleted.isEmpty {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
+                print("removeRows", changeset.elementDeleted)
             }
 
             if !changeset.elementInserted.isEmpty {
                 insertRows(at: IndexSet(changeset.elementInserted.map { $0.element }), withAnimation: insertRowsAnimation())
+                print("InsertRows", changeset.elementUpdated)
             }
 
             if !changeset.elementUpdated.isEmpty {
                 reloadData(forRowIndexes: IndexSet(changeset.elementUpdated.map { $0.element }), columnIndexes: IndexSet(changeset.elementUpdated.map { $0.section }))
             }
+            
+            endUpdates()
+            beginUpdates()
 
             for (source, target) in changeset.elementMoved {
+                print("Move", source, target)
                 moveRow(at: source.element, to: target.element)
             }
 
@@ -108,7 +114,7 @@ public extension NSCollectionView {
         using stagedChangeset: StagedChangeset<C>,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
         setData: (C) -> Void
-        ) {
+    ) {
         if case .none = window, let data = stagedChangeset.last?.data {
             setData(data)
             return reloadData()
