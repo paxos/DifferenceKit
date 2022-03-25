@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,9 @@
 		6F553BAD27ECF56500233969 /* Example_macOSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F553BAC27ECF56500233969 /* Example_macOSUITestsLaunchTests.swift */; };
 		6F553BBA27ECF75000233969 /* Example_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F553BB927ECF75000233969 /* Example_macOSTests.swift */; };
 		6F553BC127ECFD4600233969 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F553BC027ECFD4600233969 /* Storyboard.storyboard */; };
+		6F933B2127ED6D8900B0F3C4 /* Differ in Frameworks */ = {isa = PBXBuildFile; productRef = 6F933B2027ED6D8900B0F3C4 /* Differ */; };
+		6FE04CA527ED42BC00D01413 /* FlexibleDiff in Frameworks */ = {isa = PBXBuildFile; productRef = 6FE04CA427ED42BC00D01413 /* FlexibleDiff */; };
+		6FE04CA727ED539400D01413 /* OrderedOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE04CA627ED539400D01413 /* OrderedOperations.swift */; };
 		750C1E6E21515AF800034704 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 750C1E6D21515AF800034704 /* AppDelegate.swift */; };
 		750C1E7021515AFB00034704 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 750C1E6F21515AFB00034704 /* Assets.xcassets */; };
 		750C1E7321515AFB00034704 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 750C1E7121515AFB00034704 /* MainMenu.xib */; };
@@ -76,13 +79,13 @@
 /* Begin PBXFileReference section */
 		6BAE817C227853360060866E /* ShuffleEmoticonCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShuffleEmoticonCollectionViewItem.swift; sourceTree = "<group>"; };
 		6BE7D4F4215225A600D2F8E9 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
-		6F553B9727ECD0DF00233969 /* OrderedOperations */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = OrderedOperations; path = ../../../Differ/OrderedOperations; sourceTree = "<group>"; };
 		6F553BA827ECF56500233969 /* Example-macOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Example-macOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F553BAA27ECF56500233969 /* Example_macOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example_macOSUITests.swift; sourceTree = "<group>"; };
 		6F553BAC27ECF56500233969 /* Example_macOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example_macOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		6F553BB727ECF75000233969 /* Example-macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Example-macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F553BB927ECF75000233969 /* Example_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example_macOSTests.swift; sourceTree = "<group>"; };
 		6F553BC027ECFD4600233969 /* Storyboard.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Storyboard.storyboard; sourceTree = "<group>"; };
+		6FE04CA627ED539400D01413 /* OrderedOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderedOperations.swift; sourceTree = "<group>"; };
 		750C1E6A21515AF800034704 /* Example-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Example-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		750C1E6D21515AF800034704 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		750C1E6F21515AFB00034704 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -111,6 +114,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FE04CA527ED42BC00D01413 /* FlexibleDiff in Frameworks */,
+				6F933B2127ED6D8900B0F3C4 /* Differ in Frameworks */,
 				7541B1E3215173F400769EEC /* DifferenceKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -145,7 +150,6 @@
 		750C1E6121515AF800034704 = {
 			isa = PBXGroup;
 			children = (
-				6F553B9727ECD0DF00233969 /* OrderedOperations */,
 				7541B1DA215173EA00769EEC /* DifferenceKit.xcodeproj */,
 				750C1E6C21515AF800034704 /* Sources */,
 				6F553BA927ECF56500233969 /* Example-macOSUITests */,
@@ -176,6 +180,7 @@
 				750C1E7121515AFB00034704 /* MainMenu.xib */,
 				750C1E7421515AFB00034704 /* Info.plist */,
 				6F553BC027ECFD4600233969 /* Storyboard.storyboard */,
+				6FE04CA627ED539400D01413 /* OrderedOperations.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -243,6 +248,10 @@
 				7541B1E6215173F400769EEC /* PBXTargetDependency */,
 			);
 			name = "Example-macOS";
+			packageProductDependencies = (
+				6FE04CA427ED42BC00D01413 /* FlexibleDiff */,
+				6F933B2027ED6D8900B0F3C4 /* Differ */,
+			);
 			productName = "Example-macOS";
 			productReference = 750C1E6A21515AF800034704 /* Example-macOS.app */;
 			productType = "com.apple.product-type.application";
@@ -279,6 +288,10 @@
 				Base,
 			);
 			mainGroup = 750C1E6121515AF800034704;
+			packageReferences = (
+				6FE04CA327ED42BC00D01413 /* XCRemoteSwiftPackageReference "FlexibleDiff" */,
+				6F933B1F27ED6D8900B0F3C4 /* XCRemoteSwiftPackageReference "Differ" */,
+			);
 			productRefGroup = 750C1E6B21515AF800034704 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
@@ -364,6 +377,7 @@
 			files = (
 				6BE7D4F5215225A600D2F8E9 /* StringExtensions.swift in Sources */,
 				750C1E7C21515BCC00034704 /* ShuffleEmoticonViewController.swift in Sources */,
+				6FE04CA727ED539400D01413 /* OrderedOperations.swift in Sources */,
 				750C1E6E21515AF800034704 /* AppDelegate.swift in Sources */,
 				6BAE817D227853360060866E /* ShuffleEmoticonCollectionViewItem.swift in Sources */,
 			);
@@ -686,6 +700,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6F933B1F27ED6D8900B0F3C4 /* XCRemoteSwiftPackageReference "Differ" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tonyarnold/Differ.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		6FE04CA327ED42BC00D01413 /* XCRemoteSwiftPackageReference "FlexibleDiff" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RACCommunity/FlexibleDiff.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6F933B2027ED6D8900B0F3C4 /* Differ */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F933B1F27ED6D8900B0F3C4 /* XCRemoteSwiftPackageReference "Differ" */;
+			productName = Differ;
+		};
+		6FE04CA427ED42BC00D01413 /* FlexibleDiff */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6FE04CA327ED42BC00D01413 /* XCRemoteSwiftPackageReference "FlexibleDiff" */;
+			productName = FlexibleDiff;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 750C1E6221515AF800034704 /* Project object */;
 }

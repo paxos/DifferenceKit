@@ -27,7 +27,6 @@
 		6B5B40AB211066EA00A931DB /* AnyDifferentiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B408B211066B300A931DB /* AnyDifferentiable.swift */; };
 		6B5B40AC211066EA00A931DB /* ElementPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B408D211066B300A931DB /* ElementPath.swift */; };
 		6B956B762110B25300DE3D29 /* UIKitExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B4088211066B300A931DB /* UIKitExtension.swift */; };
-		6F553BA327ECDEF000233969 /* OrderedOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F553BA227ECDEF000233969 /* OrderedOperations.swift */; };
 		755D649621514ECB0049A3C5 /* AppKitExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755D649521514ECB0049A3C5 /* AppKitExtension.swift */; };
 		A9AAED5E235EEBBB00995855 /* ContentIdentifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9AAED5D235EEBBB00995855 /* ContentIdentifiable.swift */; };
 /* End PBXBuildFile section */
@@ -68,7 +67,6 @@
 		6B5B409A211066BF00A931DB /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6B5B409B211066BF00A931DB /* TestTools.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestTools.swift; sourceTree = "<group>"; };
 		6F553B9C27ECDBAF00233969 /* OrderedOperations */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = OrderedOperations; path = ../Differ/OrderedOperations; sourceTree = "<group>"; };
-		6F553BA227ECDEF000233969 /* OrderedOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OrderedOperations.swift; path = ../../Differ/OrderedOperations/Sources/OrderedOperations/OrderedOperations.swift; sourceTree = "<group>"; };
 		755D649521514ECB0049A3C5 /* AppKitExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitExtension.swift; sourceTree = "<group>"; };
 		A9AAED5D235EEBBB00995855 /* ContentIdentifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifiable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -123,7 +121,6 @@
 		6B5B4085211066B300A931DB /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				6F553BA227ECDEF000233969 /* OrderedOperations.swift */,
 				6B5B4087211066B300A931DB /* Extensions */,
 				6B5B4086211066B300A931DB /* Algorithm.swift */,
 				6B5B408F211066B300A931DB /* Changeset.swift */,
@@ -314,7 +311,6 @@
 				6B5B40A5211066EA00A931DB /* Algorithm.swift in Sources */,
 				6B5B40AC211066EA00A931DB /* ElementPath.swift in Sources */,
 				6B5B40A6211066EA00A931DB /* Differentiable.swift in Sources */,
-				6F553BA327ECDEF000233969 /* OrderedOperations.swift in Sources */,
 				6B5B40AA211066EA00A931DB /* ArraySection.swift in Sources */,
 				6B5B40A9211066EA00A931DB /* StagedChangeset.swift in Sources */,
 				6B5B40A7211066EA00A931DB /* DifferentiableSection.swift in Sources */,

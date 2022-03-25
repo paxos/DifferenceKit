@@ -1,11 +1,13 @@
 import Cocoa
+import Differ
 import DifferenceKit
+import FlexibleDiff
 
 final class ShuffleEmoticonViewController: NSViewController {
     @IBOutlet var collectionView: NSCollectionView!
     @IBOutlet var tableView: NSTableView!
 
-    private var data = ["test", "is", "this", "working", "?"]
+    private var data = ["Welcome"]
     private var dataInput: [String] {
         get { return data }
         set {
@@ -13,7 +15,7 @@ final class ShuffleEmoticonViewController: NSViewController {
             collectionView.reload(using: changeset) { data in
                 self.data = data
             }
-            tableView.reload(using: changeset, with: .effectFade) { data in
+            tableView.reload(using: changeset, with: .effectFade, originalData: data, newData: newValue) { data in
                 self.data = data
             }
         }
@@ -33,12 +35,24 @@ final class ShuffleEmoticonViewController: NSViewController {
 
     func runScenarios() {
         let scenarios = [
-            // failing
+            // Out of bounds
+//            (from: ["0", "7", "3", "7", "4"], to: ["9", "9", "1", "8", "4", "7", "2", "7", "7", "5"]),
+//            (from: ["2", "3", "6"], to: ["5", "0", "6", "1", "6", "0", "6", "2", "3"]),
+
+            // out of bounds, no duplicates
+            (from: ["0", "7", "3", "7", "4"], to: ["9", "9", "1", "8", "4", "7", "2", "7", "7", "5"]),
+
+            // new
+            (from: ["1", "2", "3"], to: ["1", "3", "2", "4", "9"]),
+
+            (from: ["1", "2", "3", "4", "5", "6", "7", "8", "9"], to: ["1", "rofl", "4", "2", "lol"]), // This one produces two changesets, moves in the first
+
+//             failing
             (from: ["1", "2", "3"], to: ["1", "3", "4", "2"]), // Example where move relates to index of initial sets, so move needs to go first
 
             // Okay
 
-            (from: ["1", "2", "3"], to: ["3", "2", "1"]),
+            (from: ["1", "2", "3"], to: ["3", "rofl", "2", "1"]),
             (from: ["1", "2", "3", "4"], to: ["4", "3", "2", "1"]),
             (from: ["1", "2", "3"], to: ["1", "2"]),
             (from: ["1", "2", "3"], to: ["1", "2", "3", "4"]),
@@ -59,8 +73,16 @@ final class ShuffleEmoticonViewController: NSViewController {
 
         for scenario in scenarios {
 //            print("🫡 Running Scenario: \(scenario.from) -> \(scenario.to)")
-            let result = runScenario(from: scenario.from, to: scenario.to)
+            data = scenario.from
+            tableView.reloadData()
+
+            // This forces a "flush" of the changes
+            tableView.layout()
+
+            let result = runScenarioDiffer(from: scenario.from, to: scenario.to)
+//            let result = runScenarioFlexiDiff(from: scenario.from, to: scenario.to)
             if scenario.to != result {
+                print("result:", result)
                 print("🫡 Scenario FAILED ❌: \(scenario.from) -> \(scenario.to)")
             } else {
                 print("🫡 Scenario OK ✅: \(scenario.from) -> \(scenario.to)")
@@ -69,17 +91,105 @@ final class ShuffleEmoticonViewController: NSViewController {
     }
 
     func runScenario(from: [String], to: [String]) -> [String] {
+        let changeset = StagedChangeset(source: from, target: to)
+        tableView.reload(using: changeset, with: .effectFade, originalData: from, newData: to) { data in
+            print("applying data: ", data)
+            self.data = data
+        }
+
+        return dataFromTableState()
+    }
+
+    func runScenarioDiffer(from: [String], to: [String]) -> [String] {
+        let patches = extendedPatch(from: from, to: to)
+
+//        tableView.apply(patches) // This is broken as well 💣
+        data = to
+        tableView.beginUpdates()
+        for patch in patches {
+            switch patch {
+            case .insertion(index: let index, element: _):
+                tableView.insertRows(at: .init(integer: index), withAnimation: [.effectFade])
+            case .deletion(index: let index):
+                tableView.removeRows(at: .init(integer: index), withAnimation: [.effectFade])
+            case .move(from: let from, to: let to):
+//                tableView.beginUpdates()
+                tableView.moveRow(at: from, to: to)
+//                tableView.endUpdates()
+            }
+        }
+
+        tableView.endUpdates()
+
+        return dataFromTableState()
+    }
+
+    func runScenarioDifferBuiltIn(from: [String], to: [String]) -> [String] {
+        data = to
+        let patches = extendedPatch(from: from, to: to)
+
+        tableView.apply(patches) // This is broken as well 💣
+        return dataFromTableState()
+    }
+
+    func runScenarioFlexiDiff(from: [String], to: [String]) -> [String] {
         data = from
         tableView.reloadData()
 
         // This forces a "flush" of the changes
         tableView.layout()
 
-        let changeset = StagedChangeset(source: from, target: to)
-        tableView.reload(using: changeset, with: .effectFade) { data in
-            print("applying data: ", data)
-            self.data = data
+        let changeset = Changeset(previous: from,
+                                  current: to)
+
+//        let c = SectionedChangeset(
+
+//        let snapshot = Snapshot(previous: from, current: to, changeset: <#T##Changeset#>)
+
+        /// 5. Perform inserts specified by `inserts` and `moves` (destinations).
+
+//        let changeset = StagedChangeset(source: from, target: to)
+//        tableView.reload(using: changeset, with: .effectFade) { data in
+//            print("applying data: ", data)
+//            self.data = data
+//        }
+
+        data = to
+//        tableView.beginUpdates()
+//
+//        /// 2. Obtain all insertion and removal offsets, including move offsets.
+//        let removals = changeset.removals.union(IndexSet(changeset.moves.map { $0.source }))
+//        let inserts = changeset.inserts.union(IndexSet(changeset.moves.map { $0.destination }))
+//
+//        /// 3. Perform removals specified by `removals` and `moves` (sources).
+//        for range in removals.rangeView.reversed() {
+//            tableView.removeRows(at: removals)
+//        }
+//
+//        /// 5. Perform inserts specified by `inserts` and `moves` (destinations).
+//
+//        for range in inserts.rangeView {
+//            tableView.insertRows(at: inserts)
+//        }
+//
+//        tableView.endUpdates()
+
+        let removals = changeset.removals.union(IndexSet(changeset.moves.map { $0.source }))
+        let inserts = changeset.inserts.union(IndexSet(changeset.moves.map { $0.destination }))
+
+        tableView.beginUpdates()
+        tableView.removeRows(at: changeset.removals)
+        tableView.insertRows(at: changeset.inserts)
+        tableView.endUpdates()
+
+        tableView.beginUpdates()
+        changeset.moves.forEach {
+            // Source index always relates to the source data
+            // We need to figure out where they are now
+
+            tableView.moveRow(at: $0.source, to: $0.destination)
         }
+        tableView.endUpdates()
 
         return dataFromTableState()
     }
@@ -130,7 +240,7 @@ final class ShuffleEmoticonViewController: NSViewController {
         print("new data: ", data)
 
         let changeset = StagedChangeset(source: oldData, target: data)
-        tableView.reload(using: changeset, with: .effectFade) { data in
+        tableView.reload(using: changeset, with: .effectFade, originalData: oldData, newData: data) { data in
             self.data = data
         }
     }

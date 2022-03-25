@@ -28,17 +28,23 @@ public extension NSTableView {
     ///   - setData: A closure that takes the collection as a parameter.
     ///              The collection should be set to data-source of NSTableView.
 
-    func reload<C>(
+    func reload<C: Equatable>(
         using stagedChangeset: StagedChangeset<C>,
         with animation: @autoclosure () -> NSTableView.AnimationOptions,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
+        originalData: C,
+        newData: C,
         setData: (C) -> Void
-    ) {
+    )
+        where C.Element: Equatable
+    {
         reload(
             using: stagedChangeset,
             deleteRowsAnimation: animation(),
             insertRowsAnimation: animation(),
             reloadRowsAnimation: animation(),
+            originalData: originalData,
+            newData: newData,
             interrupt: interrupt,
             setData: setData
         )
@@ -67,89 +73,102 @@ public extension NSTableView {
         deleteRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
         insertRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
         reloadRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
+        originalData: C,
+        newData: C,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
         setData: (C) -> Void
-    ) {
+    )
+        where C.Element: Equatable
+    {
         if case .none = window, let data = stagedChangeset.last?.data {
             setData(data)
             return reloadData()
         }
 
+        // we will replay all operations on playAlong and keep originalData for reference of the original offsets
+//        var playAlong = Array(originalData)
+
         for changeset in stagedChangeset {
             print("➡️ next changeset…")
+            print("changeset data: ", changeset.data)
             if let interrupt = interrupt, interrupt(changeset), let data = stagedChangeset.last?.data {
                 setData(data)
                 return reloadData()
             }
-
-            let operations = changeset.elementMoved.map { OrderedOperation(from: $0.source.element, to: $0.target.element) }
-            let converter = OrderedOperationConverter(unorderedOperations: operations)
             
-            converter.convert()
-            print("UI State: \(dataFromTableState())")
-
+            
+            // MARK: - Moves
             beginUpdates()
-            converter.operations.forEach {
-                print("Move", $0.from, $0.to)
-                moveRow(at: $0.from, to: $0.to)
+
+            // We found out that source always related to the element that was initially on that offset
+            // where is it now? I have no idea :)
+            for (source, target) in changeset.elementMoved {
+                print("UI State before:", dataFromTableState())
+//                print("playAlong:", playAlong)
+                /// A "move" is the same as this:
+                /// removeRows(at: IndexSet(integer: source.element))
+                /// insertRows(at: IndexSet(integer: target.
+                ///
+                ///
+                ///
+
+//                let elementInOriginalData = Array(originalData)[source.element]
+////                let adjustedFromIndex = playAlong.firstIndex(where: { $0 == elementInOriginalData })!
+//
+//                print("Move", source.element, target.element)
+//                print("Move (adjusted)", adjustedFromIndex, target.element)
+//                //                print("Move adjusted", adjustedSourceIndex, target.element)
+//
+//                moveRow(at: adjustedFromIndex, to: target.element)
+//
+//                //
+//                //                removeLog.append(source.element)
+//                //                insertionLog.append(target.element)
+//
+//                print("UI State after: ", dataFromTableState())
+
+                //                beginUpdates()
             }
             endUpdates()
-            print("UI State: \(dataFromTableState())")
-            
-            beginUpdates()
+//
+//            let operations = changeset.elementMoved.map { OrderedOperation(from: $0.source.element, to: $0.target.element) }
+//            let converter = OrderedOperationConverter(unorderedOperations: operations)
+//
             setData(changeset.data)
-
-
+//
+            beginUpdates()
 
             if !changeset.elementDeleted.isEmpty {
                 removeRows(at: IndexSet(changeset.elementDeleted.map { $0.element }), withAnimation: deleteRowsAnimation())
+                // Replay
+//                changeset.elementDeleted.forEach { playAlong.remove(at: $0.element) }
                 print("removeRows", changeset.elementDeleted)
 
-                changeset.elementDeleted.forEach { converter.recordDelete(atIndex: $0.element) }
+//                changeset.elementDeleted.forEach { converter.recordDelete(atIndex: $0.element) }
             }
 
             if !changeset.elementInserted.isEmpty {
                 insertRows(at: IndexSet(changeset.elementInserted.map { $0.element }), withAnimation: insertRowsAnimation())
+                // Replay
+//                changeset.elementInserted.forEach {
+//                    playAlong.insert(Array(newData)[$0.element], at: $0.element)
+//                }
                 print("InsertRows", changeset.elementInserted)
 
                 // TODO: Adjust target offsets after current index
-                changeset.elementInserted.forEach { converter.recordInsert(atIndex: $0.element + 1) }
+//                changeset.elementInserted.forEach { converter.recordInsert(atIndex: $0.element + 1) }
             }
-
+//
             if !changeset.elementUpdated.isEmpty {
                 reloadData(forRowIndexes: IndexSet(changeset.elementUpdated.map { $0.element }), columnIndexes: IndexSet(changeset.elementUpdated.map { $0.section }))
             }
-
+//
             endUpdates()
+            print("UI State: \(dataFromTableState())")
+//
 
 
-            // Convert the unordered instruction set to an ordered one
-//            let orderedOperations = OrderedOperations(unorderedOperations: changeset.elementMoved)
-//            orderedOperations.convert()
-//
-//            orderedOperations.operations.forEach { moveRow(at: $0.from, to: $0.to) }
-
-//            beginUpdates()
-//            for (source, target) in changeset.elementMoved {
-//                print("UI State before: ", dataFromTableState())
-//                /// A "move" is the same as this:
-//                /// removeRows(at: IndexSet(integer: source.element))
-//                /// insertRows(at: IndexSet(integer: target.element))
-//
-//                print("Move", source.element, target.element)
-            ////                print("Move adjusted", adjustedSourceIndex, target.element)
-//
-//                moveRow(at: source.element, to: target.element)
-//
-            ////
-            ////                removeLog.append(source.element)
-            ////                insertionLog.append(target.element)
-//
-//                print("UI State after: ", dataFromTableState())
-//
-            ////                beginUpdates()
-//            }
-//            endUpdates()
+     
 
             let dataItShouldBe = changeset.data as! [String]
             let dataFromTable = dataFromTableState()

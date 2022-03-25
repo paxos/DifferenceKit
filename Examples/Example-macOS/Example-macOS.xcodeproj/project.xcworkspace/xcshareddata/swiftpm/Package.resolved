@@ -1,0 +1,41 @@
+{
+  "pins" : [
+    {
+      "identity" : "differ",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tonyarnold/Differ.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "33c0342d87cdb555a06731011393f1fc5b8200bb"
+      }
+    },
+    {
+      "identity" : "flexiblediff",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RACCommunity/FlexibleDiff.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "a5132719a812111ef7eaea647a659a351b15abf4"
+      }
+    },
+    {
+      "identity" : "nimble",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Quick/Nimble.git",
+      "state" : {
+        "revision" : "7a46a5fc86cb917f69e3daf79fcb045283d8f008",
+        "version" : "8.1.2"
+      }
+    },
+    {
+      "identity" : "quick",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Quick/Quick.git",
+      "state" : {
+        "revision" : "09b3becb37cb2163919a3842a4c5fa6ec7130792",
+        "version" : "2.2.1"
+      }
+    }
+  ],
+  "version" : 2
+}
