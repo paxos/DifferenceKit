@@ -35,6 +35,8 @@ final class ShuffleEmoticonViewController: NSViewController {
 
     func runScenarios() {
         let scenarios = [
+            (from: ["1", "2", "3"], to: ["1", "3", "4", "2"]),
+
             // Out of bounds
 //            (from: ["0", "7", "3", "7", "4"], to: ["9", "9", "1", "8", "4", "7", "2", "7", "7", "5"]),
 //            (from: ["2", "3", "6"], to: ["5", "0", "6", "1", "6", "0", "6", "2", "3"]),
@@ -79,7 +81,7 @@ final class ShuffleEmoticonViewController: NSViewController {
             // This forces a "flush" of the changes
             tableView.layout()
 
-            let result = runScenarioDiffer(from: scenario.from, to: scenario.to)
+            let result = runScenarioCustomSO(from: scenario.from, to: scenario.to)
 //            let result = runScenarioFlexiDiff(from: scenario.from, to: scenario.to)
             if scenario.to != result {
                 print("result:", result)
@@ -100,6 +102,35 @@ final class ShuffleEmoticonViewController: NSViewController {
         return dataFromTableState()
     }
 
+    // Source: https://stackoverflow.com/questions/61469329/applying-collectiondifference-to-nstableview
+    func runScenarioCustomSO(from: [String], to: [String]) -> [String] {
+        let patches = to.difference(from: from).steps
+        data = to
+        tableView.beginUpdates()
+        for step in patches {
+            switch step {
+            case let .remove(_, index):
+                print("Remove ", index)
+                tableView.removeRows(at: [index])
+//                outlineView.removeItems(at: [index], inParent: node, withAnimation: animation)
+
+            case let .insert(element, index):
+                print("Insert ", index)
+                tableView.insertRows(at: [index])
+//                outlineView.insertItems(at: [index], inParent: node, withAnimation: animation)
+
+            case let .move(element, from, to):
+                print("Move ", from, to)
+                tableView.moveRow(at: from, to: to)
+//                outlineView.moveItem(at: from, inParent: node, to: to, inParent: node)
+            }
+        }
+       
+        tableView.endUpdates()
+
+        return dataFromTableState()
+    }
+
     func runScenarioDiffer(from: [String], to: [String]) -> [String] {
         let patches = extendedPatch(from: from, to: to)
 
@@ -110,15 +141,12 @@ final class ShuffleEmoticonViewController: NSViewController {
             switch patch {
             case .insertion(index: let index, element: _):
                 tableView.insertRows(at: .init(integer: index), withAnimation: [.effectFade])
-            case .deletion(index: let index):
+            case let .deletion(index: index):
                 tableView.removeRows(at: .init(integer: index), withAnimation: [.effectFade])
-            case .move(from: let from, to: let to):
-//                tableView.beginUpdates()
+            case let .move(from: from, to: to):
                 tableView.moveRow(at: from, to: to)
-//                tableView.endUpdates()
             }
         }
-
         tableView.endUpdates()
 
         return dataFromTableState()
